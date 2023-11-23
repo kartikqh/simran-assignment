@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Appointment View</title>
+    <!-- Add your necessary CSS files or CDN links here -->
+</head>
+<body>
+            <!-- Navigation-->
+            <% if (!locals.user) { %>
+                <%- include('layout/navigation'); -%>
+            <% } else { %>
+                <% if (locals.userType =="Admin") { %>
+                    <%- include('layout/admin_navigation'); -%>
+                <% }  if (locals.userType =="Driver")  { %>
+                    <%- include('layout/driver_navigation'); -%>
+                <% } %>
+            <% } %>
+    
+
+    <div class="container" style="margin: 20px; padding: 20px; border: 1px solid #ccc;">
+        <h2>Appointment View</h2>
+
+        <div style="margin-bottom: 20px;">
+            <input type="date" value="<%= selectedDate %>" onchange="handleDateChange(this.value)" style="margin-bottom: 10px;" />
+        </div>
+
+        <div>
+            <h5 style="margin-bottom: 10px;">Add Slots for <%= getFormattedDate(new Date(selectedDate)) %> from 9 AM to 2 PM</h5>
+            <% if (loading) { %>
+                <p>Loading...</p>
+            <% } else { %>
+                <ul>
+                    <% availableSlots.forEach(function(slot) { %>
+                        <li style="margin-bottom: 5px;">
+                            <%= slot.time %>
+                            <% if (!slot.isAdded) { %>
+                                <button onclick="addSlot('<%= slot.time %>')" style="margin-left: 10px;">Add Slot</button>
+                            <% } else { %>
+                                <span style="margin-left: 10px;">Slot Added</span>
+                            <% } %>
+                        </li>
+                    <% }); %>
+                </ul>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        function handleDateChange(date) {
+            
+        }
+        // JavaScript functions like getFormattedDate, handleLogout, etc., should be included here
+        // Don't forget to convert these functions to EJS syntax as needed
+    </script>
+</body>
+</html>

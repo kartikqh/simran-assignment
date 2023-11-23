@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const middleware = require('./middleware');
+const adminMiddleware = require('./admin_middleware');
 mongoose.connect('mongodb+srv://sammehra:Vanshu12345@cluster0.u41evgd.mongodb.net/assignmentdatabase?retryWrites=true&w=majority', { useNewUrlParser: true })
 .then(() => {
     console.log('Connected to MongoDB');
@@ -32,8 +33,12 @@ app.use(
 app.listen(3000, () =>{
     console.log('App listening on port 3000')
 })
+
 app.get('/', (req, res)=>{
-    res.render('index');
+  if(req.session.user){
+    return res.render('index',{ user: req.session.user, userType: req.session.user.userType});
+  }
+    return res.render('index');
 })
 app.get('/g',middleware.requireDriverAccess, (req, res)=>{
   try {
@@ -42,27 +47,37 @@ app.get('/g',middleware.requireDriverAccess, (req, res)=>{
     const user = req.session.user;
     if (!user) {
       // If user not found, display a message and options to go back or to G2_page
-      res.render('g', { message: 'No User Found' });
+      return res.render('g', { message: 'No User Found',user: req.session.user, userType: req.session.user.userType });
     } else if ( user.licenseNo === "License Number") {
-      res.render ('g2', {message: 'Please Update your information first.'});
+      return res.render ('g2', {message: 'Please Update your information first.',user: req.session.user, userType: req.session.user.userType});
     }
-    else {
+    else if(user.userType=="Driver"){
       // If user found, display user's information and allow editing car information
-      res.render('g', { user });
+      return res.render('g', { user: req.session.user, userType: req.session.user.userType});
     }
   } catch (error) {
-    res.render('g', {message: 'Error Fetching user.'});
+    return res.render('g', {message: 'Error Fetching user.',user: req.session.user, userType: req.session.user.userType});
   }
 
 })
 app.get('/g2',middleware.requireDriverAccess, (req, res)=>{
-    res.render('g2');
+   return res.render('g2',{user: req.session.user, userType: req.session.user.userType}) 
 
 })
 app.get('/login', (req, res)=>{
-    res.render('login');
+    return res.render('login');
 
 })
+
+app.get('/logout', (req, res)=>{
+  if(req.session.user){
+    delete req.session.user;
+
+  }
+  res.render('index')
+
+})
+
 app.get('/getUser', async(req, res)=>{
     
     try {
@@ -71,13 +86,13 @@ app.get('/getUser', async(req, res)=>{
         const user = await userModel.findOne({ licenseNo: licenseNumber });
         if (!user) {
           // If user not found, display a message and options to go back or to G2_page
-          res.render('G', { message: 'No User Found' });
+          return res.render('g', { message: 'No User Found' });
         } else {
           // If user found, display user's information and allow editing car information
-          res.render('G', { user });
+          return res.render('g', { user });
         }
       } catch (error) {
-        res.render('G', {message: 'Error Fetching user.'});
+        return res.render('g', {message: 'Error Fetching user.'});
       }
 })
 
@@ -101,7 +116,7 @@ app.post('/createuser', async(req, res) => {
 
         await userModel.findOneAndUpdate({ _id: user._id }, user, { new: true });
 
-    res.render('g', {message: 'User Updated sucessfully.'} );
+    return res.render('g', {message: 'User Updated sucessfully.',user: req.session.user, userType: req.session.user.userType} );
   } catch (error) {
     console.log(error);
     res.status(500).send('An error occurred while saving the user.');
@@ -129,7 +144,7 @@ app.post('/createuser', async(req, res) => {
         // Update the car information
         Object.assign(user, newData);
         await user.save();
-        res.render('G', { message: 'Car information updated successfully.' });
+        return res.render('g', { message: 'Car information updated successfully.',user: req.session.user, userType: req.session.user.userType });
       }
     } catch (error) {
       console.error('Error updating car information:', error);
@@ -166,7 +181,7 @@ app.post('/createuser', async(req, res) => {
       // Save the new user to the database
       await newUser.save();
   
-      return res.render ('login', { message: 'User registration successful' });
+      return res.render ('login', { message: 'User registration successful'});
     } catch (error) {
       console.log(error);
       return res.render ('login', { message: 'An error occurred while signing up' });
@@ -193,9 +208,14 @@ app.post('/login', async (req, res) => {
 
     // Logic for handling first-time or second-time login here
     req.session.user = user;
-    res.render('index', { message: 'Login successful' });
+    return res.render('index', { message: 'Login successful' ,user: req.session.user, userType: req.session.user.userType});
   } catch (error) {
     console.log(error);
-    res.render('login', { message: 'An error occurred while logging in' });
+    return res.render('login', { message: 'An error occurred while logging in' });
   }
+});
+
+app.get('/appointment',middleware.requireDriverAccess, (req, res)=>{
+  return res.render('appointment',{user: req.session.user, userType: req.session.user.userType}) 
+
 });

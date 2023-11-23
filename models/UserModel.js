@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  age: { type: String, required: true },
   userType: { type: String, enum: ['Driver', 'Examiner', 'Admin'], required: true },
   firstname: { type: String, default: 'First Name' },
   lastname: { type: String, default: 'Last Name' },

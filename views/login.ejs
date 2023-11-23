@@ -4,7 +4,15 @@
     <%- include('layout/script'); -%>
     <body id="page-top">
         <!-- Navigation-->
-        <%- include('layout/navigation'); -%>
+        <% if (!locals.user) { %>
+            <%- include('layout/navigation'); -%>
+        <% } else { %>
+            <% if (locals.userType =="Admin") { %>
+                <%- include('layout/admin_navigation'); -%>
+            <% }  if (locals.userType =="Driver")  { %>
+                <%- include('layout/driver_navigation'); -%>
+            <% } %>
+        <% } %>
         <% if (locals.message) { %>
             <div class="mt-5 mb-3">
               <div class="custom-alert">
@@ -22,7 +30,7 @@
                     <h1>Login</h1>
                     <form action="/login" method="post">
                         <input type="text" name="username" placeholder="Username">
-                        <input type="password" name="password" placeholder="Password">
+                        <input type="password" name="password" placeholder="Password" class="form-control">
                         <button type="submit">Login</button>
                     </form>
                 </div>

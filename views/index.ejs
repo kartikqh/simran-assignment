@@ -4,7 +4,23 @@
     <%- include('layout/script'); -%>
     <body>
         <!-- Navigation-->
-        <%- include('layout/navigation'); -%>
+        <% if (!locals.user) { %>
+            <% if (!locals.user) { %>
+            <%- include('layout/navigation'); -%>
+        <% } else { %>
+            <% if (locals.userType =="Admin") { %>
+                <%- include('layout/admin_navigation'); -%>
+            <% }  if (locals.userType =="Driver")  { %>
+                <%- include('layout/driver_navigation'); -%>
+            <% } %>
+        <% } %>
+        <% } else { %>
+            <% if (locals.userType =="Admin") { %>
+                <%- include('layout/admin_navigation'); -%>
+            <% }  if (locals.userType =="Driver")  { %>
+                <%- include('layout/driver_navigation'); -%>
+            <% } %>
+        <% } %>
         <div class="cover">
             <div>
                 <h1>Dashboard</h1>
