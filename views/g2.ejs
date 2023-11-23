@@ -57,9 +57,29 @@
                     <input type="number" id="year" name="year" required>
                     <label for="plateNumber">Plate Number</label>
                     <input type="text" id="plateNumber" name="plateNumber" required>
+                    <div style="margin-bottom: 20px;">
+                        <h5 style="margin-bottom: 10px;">Book Slots from 9 AM to 2 PM</h5>
+                        <div style="margin-bottom: 20px;">
+                            <input disabled type="date" value="<%= selectedDate %>" name="date" style="margin-bottom: 10px;" />
+                        </div>
+                        <% if (locals.availableSlots) { %>
+                        <label>Select Slots</label>
+                        <select class="form-control" name="appointment_id">
+                        <% availableSlots.forEach(function(slot) { %>
+                        <option key="<%=slot.id  %>" value="<%= slot._id %>">
+                            <%= slot.time %>
+                        </option>
+                        <% }); %>
+
+                        </select>
+                        <% } else  {%>
+                            <label>No Slots For today</label>
+                            <% } %>
+
+                    </div>
                 </div>
                 <div class="section">
-                    <input type="submit" value="Submit">
+                    <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </form>
         </div>

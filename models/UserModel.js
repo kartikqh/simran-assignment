@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
     year: { type: String, default: 'Year' },
     platno: { type: String, default: 'Plate Number' },
   },
+  appointment_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Appointment'   
+    },
 });
 
 // Create User model
