@@ -7,7 +7,9 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const middleware = require('./middleware');
 const adminMiddleware = require('./admin_middleware');
-mongoose.connect('mongodb+srv://sammehra:Vanshu12345@cluster0.u41evgd.mongodb.net/assignmentdatabase?retryWrites=true&w=majority', { useNewUrlParser: true })
+//mongodb+srv://sammehra:Vanshu12345@cluster0.u41evgd.mongodb.net/assignmentdatabase?retryWrites=true&w=majority
+mongoose.connect('mongodb://127.0.0.1:27017/simran', { useNewUrlParser: true,
+useUnifiedTopology: true, })
 .then(() => {
     console.log('Connected to MongoDB');
   })
@@ -45,27 +47,29 @@ app.get('/g',middleware.requireDriverAccess, async(req, res)=>{
   try {
     
     const user = req.session.user;
-    if (!user) {
-      // If user not found, display a message and options to go back or to G2_page
-      return res.render('g', { message: 'No User Found',user: req.session.user, userType: req.session.user.userType });
-    } else if ( user.licenseNo === "License Number") {
-      let date=new Date()
+    let date=new Date()
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
     date=`${year}-${month}-${day}`
-      const appointment = await appointmentModel.find({date, isAdded: true, isTimeAvailable:True});
+    const appointment = await appointmentModel.find({date, isAdded: true, isTimeAvailable:true});
+    console.log(user)
+    if (!user) {
+      // If user not found, display a message and options to go back or to G2_page
+      return res.render('g2', { message: 'No User Found',user: req.session.user, userType: req.session.user.userType });
+    } else if ( user.licenseNo ==="") {
+      console.log(user.licenseNo)
       if (appointment.length > 0){
-      const appointment = await appointmentModel.find({date, isAdded: true, isTimeAvailable:True});
       return res.render ('g2', {message: 'Please Update your information first.',user: req.session.user, userType: req.session.user.userType, selectedDate: date, availableSlots:appointment, selectedSlot: appointment[0].time});
       }
       return res.render ('g2', {message: 'Please Update your information first.',user: req.session.user, userType: req.session.user.userType, selectedDate: date});
     }
     else if(user.userType=="Driver"){
       // If user found, display user's information and allow editing car information
-      return res.render('g', { user: req.session.user, userType: req.session.user.userType});
+      return res.render('g', { user: req.session.user, userType: req.session.user.userType,selectedDate: date, availableSlots:appointment, selectedSlot: appointment[0].time });
     }
   } catch (error) {
+    console.log(error)
     return res.render('g', {message: 'Error Fetching user.',user: req.session.user, userType: req.session.user.userType});
   }
 
@@ -77,9 +81,9 @@ app.get('/g2',middleware.requireDriverAccess, async(req, res)=>{
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const year = date.getFullYear();
   date=`${year}-${month}-${day}`
-    const appointment = await appointmentModel.find({date, isAdded: true, isTimeAvailable:true});
+  let appointment = await appointmentModel.find({date, isAdded: true, isTimeAvailable:true});
     if (appointment.length > 0){
-      const appointment = await appointmentModel.find({date, isAdded: true, isTimeAvailable:true});
+      appointment = await appointmentModel.find({date, isAdded: true, isTimeAvailable:true});
     return res.render ('g2', {user: req.session.user, userType: req.session.user.userType, selectedDate: date, availableSlots:appointment, selectedSlot: appointment[0].time});
     }
     return res.render ('g2', {user: req.session.user, userType: req.session.user.userType, selectedDate: date});
@@ -124,7 +128,7 @@ app.post('/createuser', async(req, res) => {
   try {
     const saltRounds = 6;
     const hashedLicenseNumber = await bcrypt.hash(req.body.licenseNumber, saltRounds);
-    if(req.body.appointment_id){
+    if(req.body.appointment_id!=""){
     const appointment = await appointmentModel.updateOne({_id: new mongoose.Types.ObjectId(req.body.appointment_id)}, {
       $set:{
         isTimeAvailable: false
@@ -341,18 +345,106 @@ app.get('/appointment',adminMiddleware.requireAdminAccess, async(req, res)=>{
 }
 });
 
-app.post('/book_appointment', async (req, res) => {
+app.post('/book_appointment',adminMiddleware.requireAdminAccess, async (req, res) => {
   try {
     const { date, time } = req.body;
+    if(new Date().setHours(0,0,0,0)> new Date(date).setHours(0,0,0,0)){
+      let date=new Date()
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      date=`${year}-${month}-${day}`
+      const appointment = await appointmentModel.find({date});
+      return res.render('appointment',{ message: 'Appointment slot cannot be added for past dates',user: req.session.user, userType: req.session.user.userType, selectedDate: date, availableSlots: appointment, selectedSlot: "09:00" }); 
+    }
     const existingAppointment = await appointmentModel.findOne({ date, time });
     console.log(existingAppointment)
     if (existingAppointment && existingAppointment.isAdded) {
       const appointment = await appointmentModel.find({date});
       return res.render('appointment',{ message: 'Appointment slot already exists',user: req.session.user, userType: req.session.user.userType, selectedDate: date, availableSlots: appointment, selectedSlot: "09:00" });
     }
+    else if(existingAppointment){
+      await appointmentModel.updateOne({ date, time},{$set:{ isTimeAvailable: true , isAdded: true}});
+    const appointment = await appointmentModel.find({date});
+    return res.render('appointment',{ message: 'Appointment Added',user: req.session.user, userType: req.session.user.userType, selectedDate: date, availableSlots: appointment, selectedSlot: "09:00" });
+    }
+    else{
+      const createAppointment= [{
+        id: '1',
+        date: date,
+        time: '09:00',
+        isTimeAvailable: false,
+        isAdded: false
+    },{
+        id: '2',
+        date: date,
+        time: '09:30',
+        isTimeAvailable: false,
+        isAdded: false
+    },{
+        id: '3',
+        time: '10:00',
+        date: date,
+        isTimeAvailable: false,
+        isAdded: false
+    },{
+        id: '4',
+        time: '10:30',
+        date: date,
+        isTimeAvailable: false,
+        isAdded: false
+    },{
+        id: '5',
+        time: '11:00',
+        date: date,
+        isTimeAvailable: false,
+        isAdded: false
+    },
+    {
+        id: '6',
+        time: '11:30',
+        date: date,
+        isTimeAvailable: false,
+        isAdded: false
+    },{
+        id: '7',
+        time: '12:00',
+        date: date,
+        isTimeAvailable: false,
+        isAdded: false
+    },{
+        id: '8',
+        time: '12:30',
+        date: date,
+        isTimeAvailable: false,
+        isAdded: false
+    },{
+        id: '9',
+        time: '01:00',
+        date: date,
+        isTimeAvailable: false,
+        isAdded: false
+    },{
+        id: '10',
+        time: '01:30',
+        date: date,
+        isTimeAvailable: false,
+        isAdded: false
+    },
+    {
+        id: '11',
+        time: '02:00',
+        date: date,
+        isTimeAvailable: false,
+        isAdded: false
+    }]
+    await appointmentModel.insertMany(createAppointment)
     await appointmentModel.updateOne({ date, time},{$set:{ isTimeAvailable: true , isAdded: true}});
     const appointment = await appointmentModel.find({date});
     return res.render('appointment',{ message: 'Appointment Added',user: req.session.user, userType: req.session.user.userType, selectedDate: date, availableSlots: appointment, selectedSlot: "09:00" });
+
+    }
+    
   } catch (error) {
     console.log(error);
     return res.render ('login', { message: 'An error occurred while signing up' });

@@ -1,87 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
-    <%- include('layout/header'); -%>
-    <%- include('layout/script'); -%>
-    <body>
-        <!-- Navigation-->
-        <% if (!locals.user) { %>
-            <%- include('layout/navigation'); -%>
-        <% } else { %>
-            <% if (locals.userType =="Admin") { %>
-                <%- include('layout/admin_navigation'); -%>
-            <% }  if (locals.userType =="Driver")  { %>
-                <%- include('layout/driver_navigation'); -%>
-            <% } %>
-        <% } %>
+<%- include('layout/header'); -%>
+<%- include('layout/script'); -%>
 
-          <!-- give error message -->
-          <% if (locals.message) { %>
-            <div class="mt-5 mb-3">
-              <div class="custom-alert">
-                <strong><%= message %></strong>
-                <button type="button" class="custom-close" aria-label="Close"></button>
-              </div>
-            </div>
-          <% } %>
-          
-        <div class="container">
-            <h1>Data Entry Form</h1>
-            <form action="/createuser" method="post">
-                <div class="section">
-                    <label for="firstName">First Name</label>
-                    <input type="text" id="firstName" name="firstName" required>
-                </div>
-                <div class="section">
-                    <label for="lastName">Last Name</label>
-                    <input type="text" id="lastName" name="lastName" required>
-                </div>
-                <div class="section">
-                    <label for="licenseNumber">License Number (8 characters alpha-numeric)</label>
-                    <input type="text" id="licenseNumber" name="licenseNumber" pattern="[A-Za-z0-9]{8}" required>
-                </div>
-                <div class="section">
-                    <label for="age">Age (Integer)</label>
-                    <input type="number" id="age" name="age" required>
-                </div>
-                <div class="section">
-                    <label for="dob">Date of Birth</label>
-                    <input type="date" id="dob" name="dob" required>
-                </div>
-                <div class="section">
-                    <h2>Car Details</h2>
-                    <label for="make">Make</label>
-                    <input type="text" id="make" name="make" required>
-                    <label for="model">Model</label>
-                    <input type="text" id="model" name="model" required>
-                    <label for="year">Year</label>
-                    <input type="number" id="year" name="year" required>
-                    <label for="plateNumber">Plate Number</label>
-                    <input type="text" id="plateNumber" name="plateNumber" required>
-                    <div style="margin-bottom: 20px;">
-                        <h5 style="margin-bottom: 10px;">Book Slots from 9 AM to 2 PM</h5>
-                        <div style="margin-bottom: 20px;">
-                            <input disabled type="date" value="<%= selectedDate %>" name="date" style="margin-bottom: 10px;" />
-                        </div>
-                        <% if (locals.availableSlots) { %>
-                        <label>Select Slots</label>
-                        <select class="form-control" name="appointment_id">
-                        <% availableSlots.forEach(function(slot) { %>
-                        <option key="<%=slot.id  %>" value="<%= slot._id %>">
-                            <%= slot.time %>
-                        </option>
-                        <% }); %>
+<body>
+  <!-- Navigation -->
+  <% if (!locals.user) { %>
+  <%- include('layout/navigation'); -%>
+  <% } else { %>
+  <% if (locals.userType == "Admin") { %>
+  <%- include('layout/admin_navigation'); -%>
+  <% } if (locals.userType == "Driver") { %>
+  <%- include('layout/driver_navigation'); -%>
+  <% } %>
+  <% } %>
 
-                        </select>
-                        <% } else  {%>
-                            <label>No Slots For today</label>
-                            <% } %>
+  <!-- Error Message -->
+  <% if (locals.message) { %>
+  <div class="mt-5 mb-3">
+    <div class="custom-alert">
+      <strong><%= message %></strong>
+      <button type="button" class="custom-close" aria-label="Close"></button>
+    </div>
+  </div>
+  <% } %>
 
-                    </div>
-                </div>
-                <div class="section">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </form>
+  <div class="container">
+    <h1>Data Entry Form</h1>
+    <form action="/createuser" method="post">
+      <!-- Personal Information Card -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="card-title">Personal Information</h2>
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" class="form-control" id="firstName" name="firstName" required>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" class="form-control" id="lastName" name="lastName" required>
+          </div>
+          <div class="form-group">
+            <label for="licenseNumber">License Number (8 characters alpha-numeric)</label>
+            <input type="text" class="form-control" id="licenseNumber" name="licenseNumber" pattern="[A-Za-z0-9]{8}" required>
+          </div>
+          <div class="form-group">
+            <label for="age">Age (Integer)</label>
+            <input type="number" class="form-control" id="age" name="age" required>
+          </div>
+          <div class="form-group">
+            <label for="dob">Date of Birth</label>
+            <input type="date" class="form-control" id="dob" name="dob" required>
+          </div>
         </div>
-    </body>
-    </html>
+      </div>
+
+      <!-- Car Details Card -->
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title">Car Details</h2>
+          <div class="form-group">
+            <label for="make">Make</label>
+            <input type="text" class="form-control" id="make" name="make" required>
+          </div>
+          <div class="form-group">
+            <label for="model">Model</label>
+            <input type="text" class="form-control" id="model" name="model" required>
+          </div>
+          <div class="form-group">
+            <label for="year">Year</label>
+            <input type="number" class="form-control" id="year" name="year" required>
+          </div>
+          <div class="form-group">
+            <label for="plateNumber">Plate Number</label>
+            <input type="text" class="form-control" id="plateNumber" name="plateNumber" required>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title">Create Appointment Now</h2>
+          <p style="color: red;">Note: You can also book slot later*</p>
+          <div class="form-group">
+            <h3>Book Slots from 9 AM to 2 PM</h3>
+            <div class="form-group">
+              <input disabled type="date" class="form-control" value="<%= selectedDate %>" name="date" />
+            </div>
+            <% if (locals.availableSlots) { %>
+            <div class="form-group">
+              <label>Select Slots</label>
+              <select class="form-control" name="appointment_id">
+                <option key="0" value="">Book Slot For G2</option>
+                <% availableSlots.forEach(function(slot) { %>
+                <option key="<%= slot.id %>" value="<%= slot._id %>">
+                  <%= slot.time %>
+                </option>
+                <% }); %>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Select Test Type</label>
+              <select class="form-control" name="testType">
+                <option key="1" value="G2">G2 Test</option>
+                <option key="2" value="G">G Test</option>
+                
+              </select>
+            </div>
+            <% } else { %>
+            <div class="form-group">
+              <label>No Slots For today</label>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+        
+
+      <!-- Submit Button -->
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+</body>
+
+</html>

@@ -11,7 +11,9 @@
                 <%- include('layout/admin_navigation'); -%>
             <% }  if (locals.userType =="Driver")  { %>
                 <%- include('layout/driver_navigation'); -%>
-            <% } %>
+            <% } if (locals.userType =="Examiner") { %>
+              <%- include('layout/examiner_navigation'); -%>
+              <% } %>
         <% } %>
         
         <!-- give error message -->
@@ -56,6 +58,28 @@
                       <label for="plateNumber">Plate Number</label>
                       <input type="text" class="form-control" name="platenumber" id="plateNumber"
                         value="<%= user.carInfo.platno %>" required>
+                    </div>
+                    <div class="mb-3">
+                      <h3>Book Slots from 9 AM to 2 PM</h3>
+                      <div class="form-group">
+                        <input disabled type="date" class="form-control" value="<%= selectedDate %>" name="date" />
+                      </div>
+                      <% if (locals.availableSlots) { %>
+                      <div class="mb-3">
+                        <label>Select Slots</label>
+                        <select class="form-control" name="appointment_id">
+                          <% availableSlots.forEach(function(slot) { %>
+                          <option key="<%= slot.id %>" value="<%= slot._id %>">
+                            <%= slot.time %>
+                          </option>
+                          <% }); %>
+                        </select>
+                      </div>
+                      <% } else { %>
+                      <div class="mb-3">
+                        <label>No Slots For today</label>
+                      </div>
+                      <% } %>
                     </div>
                     <button type="submit" style="background-color: blue; color: white; padding: 10px 20px; border: none; cursor: pointer;">Update Car Information</button>
                   </form>

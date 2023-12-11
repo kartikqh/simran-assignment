@@ -61,7 +61,7 @@
   --bs-body-font-size: 1rem;
   --bs-body-font-weight: 400;
   --bs-body-line-height: 1.5;
-  --bs-body-color: #212529;
+  --bs-body-color: #f4623a;
   --bs-body-bg: #fff;
   --bs-border-width: 1px;
   --bs-border-style: solid;
@@ -10996,34 +10996,44 @@ header.masthead h1, header.masthead .h1 {
 
 
 body{
-  background-color: rgb(63, 79, 80);
+  background-color: var(--bs-code-color);
   color: white;
   padding: 10px;
 }
 
-.navigationbar{
-  padding: 10px;
-  color: white;
-  position: sticky;
+/* Styles for the navigation bar */
+.navigationbar {
+  background-color: #f2f2f2; /* Example background color */
+  width: 100%;
+  position: fixed;
   top: 0;
+  left: 0;
+  z-index: 1000; /* Adjust as needed */
 }
 
-.navigationitems{
-  float:right;
+/* Styles for the navigation items */
+.navigationitems ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
-.navigationitems ul li{
-  padding: 10px;
-}
-.navigationitems ul{
-  display: flex;
-  list-style: none;
+.navigationitems li {
+  float: left;
 }
 
-.navigationitems ul li a{
+.navigationitems li a {
+  display: block;
+  padding: 10px 15px;
   text-decoration: none;
-  color: white;
+  color: #333; /* Example text color */
 }
+
+.navigationitems li a:hover {
+  background-color: #ddd; /* Example hover background color */
+}
+
 
 .cover{
   display: flex;

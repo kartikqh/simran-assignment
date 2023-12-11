@@ -1,70 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
-    <%- include('layout/header'); -%>
-    <%- include('layout/script'); -%>
-    <body id="page-top">
-        <!-- Navigation-->
-        <% if (!locals.user) { %>
-            <%- include('layout/navigation'); -%>
-        <% } else { %>
-            <% if (locals.userType =="Admin") { %>
-                <%- include('layout/admin_navigation'); -%>
-            <% }  if (locals.userType =="Driver")  { %>
-                <%- include('layout/driver_navigation'); -%>
-            <% } %>
+
+<%- include('layout/header'); -%>
+<%- include('layout/script'); -%>
+
+<body id="page-top">
+    <!-- Navigation-->
+    <% if (!locals.user) { %>
+    <%- include('layout/navigation'); -%>
+    <% } else { %>
+    <% if (locals.userType =="Admin") { %>
+    <%- include('layout/admin_navigation'); -%>
+    <% } if (locals.userType =="Driver") { %>
+    <%- include('layout/driver_navigation'); -%>
+    <% } if (locals.userType =="Examiner") { %>
+        <%- include('layout/examiner_navigation'); -%>
         <% } %>
-        <% if (locals.message) { %>
-            <div class="mt-5 mb-3">
-              <div class="custom-alert">
-                <strong><%= message %></strong>
-                <button type="button" class="custom-close" aria-label="Close"></button>
-              </div>
-            </div>
-          <% } 
-          %>
+    <% } %>
+    <% if (locals.message) { %>
+    <div class="mt-5 mb-3">
+        <div class="custom-alert">
+            <strong><%= message %></strong>
+            <button type="button" class="custom-close" aria-label="Close"></button>
+        </div>
+    </div>
+    <% } %>
     <div class="container my-4">
         <div class="row">
-            <div class="col-md-5 mx-auto">
-                
-                    <div class="login-container">
-                    <h1>Login</h1>
-                    <form action="/login" method="post">
-                        <input type="text" name="username" placeholder="Username">
-                        <input type="password" name="password" placeholder="Password" class="form-control">
-                        <button type="submit">Login</button>
-                    </form>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h1 class="card-title">Login</h1>
+                        <form action="/login" method="post">
+                            <div class="mb-3">
+                                <input type="text" name="username" placeholder="Username" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <input type="password" name="password" placeholder="Password" class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-            
-            
-                    <div class="col-md-5 mx-auto">
-                        <div class="signup">
-                    <h1>Signup</h1>
-                    <form method="POST" action="/signup">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h1 class="card-title">Signup</h1>
+                        <form method="POST" action="/signup">
                             <div class="mb-3">
-                              <label for="new-username" class="form-label">New Username:</label>
-                              <input type="text" class="form-control" id="new-username" name="username" placeholder="Enter a new username" required>
+                                <input type="text" class="form-control" id="new-username" name="username"
+                                    placeholder="Enter a new username" required>
                             </div>
                             <div class="mb-3">
-                              <label for="new-password" class="form-label">New Password:</label>
-                              <input type="password" class="form-control" id="new-password" name="password" placeholder="Enter a new password" required>
+                                <input type="password" class="form-control" id="new-password" name="password"
+                                    placeholder="Enter a new password" required>
                             </div>
                             <div class="mb-3">
-                              <label for="confirm-password" class="form-label">Confirm Password:</label>
-                              <input type="password" class="form-control" id="confirm-password" name="confirmPassword" placeholder="Confirm your password" required>
+                                <input type="password" class="form-control" id="confirm-password"
+                                    name="confirmPassword" placeholder="Confirm your password" required>
                             </div>
                             <div class="mb-3">
-                              <label for="user-type" class="form-label">User Type:</label>
-                              <select class="form-select" id="user-type" name="userType" required>
-                                <option value="Driver">Driver</option>
-                                <option value="Examiner">Examiner</option>
-                                <option value="Admin">Admin</option>
-                              </select>
+                                <select class="form-select" id="user-type" name="userType" required>
+                                    <option value="Driver">Driver</option>
+                                    <option value="Examiner">Examiner</option>
+                                    <option value="Admin">Admin</option>
+                                </select>
                             </div>
                             <button type="submit" class="btn btn-dark btn-block">Signup</button>
-                    </form>
+                        </form>
+                    </div>
                 </div>
-                </div></div>
             </div>
-    </body>
-    </html>
+        </div>
+    </div>
+</body>
+
+</html>

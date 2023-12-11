@@ -1,68 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Appointment View</title>
     <%- include('layout/header'); -%>
     <%- include('layout/script'); -%>
+    <style>
+        /* Add your custom styles here */
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        .card-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background-color: #f4623a;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
-            <!-- Navigation-->
-            <% if (!locals.user) { %>
-                <%- include('layout/navigation'); -%>
-            <% } else { %>
-                <% if (locals.userType =="Admin") { %>
-                    <%- include('layout/admin_navigation'); -%>
-                <% }  if (locals.userType =="Driver")  { %>
-                    <%- include('layout/driver_navigation'); -%>
-                <% } %>
-            <% } %>
-    
-              <!-- give error message -->
-              <% if (locals.message) { %>
-                <div class="mt-5 mb-3">
-                  <div class="custom-alert">
-                    <strong><%= locals.message %></strong>
-                    <button type="button" class="custom-close" aria-label="Close"></button>
-                  </div>
+    <!-- Navigation -->
+    <% if (!locals.user) { %>
+    <%- include('layout/navigation'); -%>
+    <% } else { %>
+    <% if (locals.userType == "Admin") { %>
+    <%- include('layout/admin_navigation'); -%>
+    <% } if (locals.userType == "Driver") { %>
+    <%- include('layout/driver_navigation'); -%>
+    <% } if (locals.userType == "Examiner") { %>
+    <%- include('layout/examiner_navigation'); -%>
+    <% } %>
+    <% } %>
+
+    <!-- Error Message -->
+    <% if (locals.message) { %>
+    <div class="mt-5 mb-3">
+        <div class="custom-alert">
+            <strong><%= locals.message %></strong>
+            <button type="button" class="custom-close" aria-label="Close"></button>
+        </div>
+    </div>
+    <% } %>
+
+    <div class="container" style="color: black;">
+        <div class="card">
+            <h2 class="card-title">Appointment View</h2>
+            <form action="/book_appointment" method="post">
+                <div class="form-group">
+                    <label>Choose the date to add slot</label>
+                    <input type="date" class="form-control" value="<%= selectedDate %>" name="date" />
                 </div>
-              <% } %>
 
-    <div class="container" style="margin: 20px; padding: 20px; border: 1px solid #ccc;">
-        <h2>Appointment View</h2>
-        <form action="/book_appointment" method="post">
-            <div style="margin-bottom: 20px;">
-                <input type="date" value="<%= selectedDate %>" name="date" style="margin-bottom: 10px;" />
-            </div>
+                <div class="form-group">
+                    <h5>Add Slots from 9 AM to 2 PM</h5>
+                    <label for="time">Update Slots</label>
+                    <select class="form-control" name="time">
+                        <% availableSlots.forEach(function(slot) { %>
+                        <option key="<%=slot.id  %>" value="<%= slot.time %>">
+                            <%= slot.time %>
+                        </option>
+                        <% }); %>
+                    </select>
+                </div>
 
-            <div style="margin-bottom: 20px;">
-                <h5 style="margin-bottom: 10px;">Add Slots from 9 AM to 2 PM</h5>
-                <label>Update Slots</label>
-                <select class="form-control" name="time">
-                <% availableSlots.forEach(function(slot) { %>
-                <option key="<%=slot.id  %>" value="<%= slot.time %>">
-                    <%= slot.time %>
-                </option>
-                <% }); %>
-                </select>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
-        </form>
-        </>
-        
-            
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Book Appointment</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        function getFormattedDate(date) {
-    const day = dateObject.getDate().toString().padStart(2, '0');
-    const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
-    const year = dateObject.getFullYear();
-    return `${year}-${month}-${day}`;
-}
-
+        // Your JavaScript code here
+        function getFormattedDate(dateObject) {
+            const day = dateObject.getDate().toString().padStart(2, '0');
+            const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+            const year = dateObject.getFullYear();
+            return `${year}-${month}-${day}`;
+        }
     </script>
 </body>
+
 </html>

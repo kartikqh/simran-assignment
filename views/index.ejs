@@ -12,6 +12,8 @@
                 <%- include('layout/admin_navigation'); -%>
             <% }  if (locals.userType =="Driver")  { %>
                 <%- include('layout/driver_navigation'); -%>
+            <% } if (locals.userType =="Examiner")  { %>
+                <%- include('layout/examiner_navigation'); -%>
             <% } %>
         <% } %>
         <% } else { %>
@@ -19,12 +21,21 @@
                 <%- include('layout/admin_navigation'); -%>
             <% }  if (locals.userType =="Driver")  { %>
                 <%- include('layout/driver_navigation'); -%>
+            <% } if (locals.userType =="Examiner")  { %>
+                <%- include('layout/examiner_navigation'); -%>
             <% } %>
         <% } %>
         <div class="cover">
             <div>
-                <h1>Dashboard</h1>
-                <p>DriveTest Booking Kiosk</p>
+                <% if (!locals.user) { %>
+                <h1>DriveTest Booking Platform</h1>
+                <a href="/login"><button class="btn btn-primary">Login / Register</button></a>
+                <% } else { %>
+                    <h2>Welcome to DriveTest Booking Platform</h2>
+                    <br>
+                    <br>
+                <h2><a href="/g"><button class="btn btn-primary">Book Your slot</button></a></h2>
+                <% } %>
             </div>
         </div>
     </body>

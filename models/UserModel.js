@@ -5,19 +5,31 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   age: { type: String},
   userType: { type: String, enum: ['Driver', 'Examiner', 'Admin'], required: true },
-  firstname: { type: String, default: 'First Name' },
-  lastname: { type: String, default: 'Last Name' },
-  licenseNo: { type: String, default: 'License Number' },
+  firstname: { type: String, default: '' },
+  lastname: { type: String, default: '' },
+  licenseNo: { type: String, default: '' },
   carInfo: {
-    make: { type: String, default: 'Make' },
-    model: { type: String, default: 'Model' },
-    year: { type: String, default: 'Year' },
-    platno: { type: String, default: 'Plate Number' },
+    make: { type: String, default: '' },
+    model: { type: String, default: '' },
+    year: { type: String, default: '' },
+    platno: { type: String, default: '' },
   },
   appointment_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Appointment'   
     },
+ examStatus:{
+  testType:{
+    type: String,
+    enum:["G2","G"]
+  },
+  comment:{
+    type:String
+  },
+  isPassed:{
+    type:Boolean
+  }
+ }
 });
 
 // Create User model
