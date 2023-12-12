@@ -7,8 +7,9 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const middleware = require('./middleware');
 const adminMiddleware = require('./admin_middleware');
+const examinerMiddleware = require('./examiner_middleware');
 //mongodb+srv://sammehra:Vanshu12345@cluster0.u41evgd.mongodb.net/assignmentdatabase?retryWrites=true&w=majority
-mongoose.connect('mongodb://127.0.0.1:27017/simran', { useNewUrlParser: true,
+mongoose.connect('mongodb+srv://sammehra:Vanshu12345@cluster0.u41evgd.mongodb.net/assignmentdatabase?retryWrites=true&w=majority', { useNewUrlParser: true,
 useUnifiedTopology: true, })
 .then(() => {
     console.log('Connected to MongoDB');
@@ -19,6 +20,7 @@ useUnifiedTopology: true, })
 const userModel = require('./models/UserModel');
 const appointmentModel = require('./models/AppointmentModel')
 const { Console } = require('console');
+const User = require('./models/UserModel');
 
 const app = new express()
 app.use(express.static('public'))
@@ -43,10 +45,22 @@ app.get('/', (req, res)=>{
   }
     return res.render('index');
 })
+
+app.get('/view-your-result', middleware.requireDriverAccess,async(req, res)=>{
+  if(req.session.user){
+    let user= await userModel.findById(req.session.user._id).populate('appointment_id');
+    return res.render('viewYourResult',{ user: user, userType: req.session.user.userType});
+  }
+    return res.render('viewYourResult');
+})
+
 app.get('/g',middleware.requireDriverAccess, async(req, res)=>{
   try {
     
     const user = req.session.user;
+    if (user.appointment_id){
+      return res.redirect('/view-your-result')
+    }
     let date=new Date()
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -66,7 +80,7 @@ app.get('/g',middleware.requireDriverAccess, async(req, res)=>{
     }
     else if(user.userType=="Driver"){
       // If user found, display user's information and allow editing car information
-      return res.render('g', { user: req.session.user, userType: req.session.user.userType,selectedDate: date, availableSlots:appointment, selectedSlot: appointment[0].time });
+      return res.render('g', { user: req.session.user, userType: req.session.user.userType,selectedDate: date, availableSlots: appointment});
     }
   } catch (error) {
     console.log(error)
@@ -76,6 +90,10 @@ app.get('/g',middleware.requireDriverAccess, async(req, res)=>{
 });
 
 app.get('/g2',middleware.requireDriverAccess, async(req, res)=>{
+  const user = req.session.user;
+  if (user.appointment_id){
+    return res.redirect('/view-your-result')
+  }
   let date=new Date()
   const day = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -84,9 +102,9 @@ app.get('/g2',middleware.requireDriverAccess, async(req, res)=>{
   let appointment = await appointmentModel.find({date, isAdded: true, isTimeAvailable:true});
     if (appointment.length > 0){
       appointment = await appointmentModel.find({date, isAdded: true, isTimeAvailable:true});
-    return res.render ('g2', {user: req.session.user, userType: req.session.user.userType, selectedDate: date, availableSlots:appointment, selectedSlot: appointment[0].time});
+    return res.render ('g2', {user: req.session.user, userType: req.session.user.userType, selectedDate: date, availableSlots:appointment, selectedSlot: appointment[0].time, licenseNo: req.session.user.licenseNo});
     }
-    return res.render ('g2', {user: req.session.user, userType: req.session.user.userType, selectedDate: date});
+    return res.render ('g2', {user: req.session.user, userType: req.session.user.userType, selectedDate: date,licenseNo: req.session.user.licenseNo});
   }
 )
 
@@ -104,30 +122,14 @@ app.get('/logout', (req, res)=>{
 
 })
 
-app.get('/getUser', async(req, res)=>{
-    
-    try {
-        const licenseNumber = req.query.licenseNumber; 
-        // Find the user based on the License Number
-        const user = await userModel.findOne({ licenseNo: licenseNumber });
-        if (!user) {
-          // If user not found, display a message and options to go back or to G2_page
-          return res.render('g', { message: 'No User Found' });
-        } else {
-          // If user found, display user's information and allow editing car information
-          return res.render('g', { user });
-        }
-      } catch (error) {
-        return res.render('g', {message: 'Error Fetching user.'});
-      }
-})
 
 app.post('/createuser', async(req, res) => {
   
   let user = req.session.user;
   try {
     const saltRounds = 6;
-    const hashedLicenseNumber = await bcrypt.hash(req.body.licenseNumber, saltRounds);
+    //const hashedLicenseNumber = await bcrypt.hash(req.body.licenseNumber, saltRounds);
+    console.log(req.body.appointment_id)
     if(req.body.appointment_id!=""){
     const appointment = await appointmentModel.updateOne({_id: new mongoose.Types.ObjectId(req.body.appointment_id)}, {
       $set:{
@@ -135,12 +137,14 @@ app.post('/createuser', async(req, res) => {
       }
     })
     user.appointment_id = req.body.appointment_id;
+    user.testType = req.body.testType;
+    user.status = req.body.status;
   }
 
     
       user.firstname = req.body.firstName;
       user.lastname = req.body.lastName;
-      user.licenseNo = hashedLicenseNumber;
+      user.licenseNo = req.body.licenseNumber;
       user.age = req.body.age;
       user.carInfo = {
         make: req.body.make,
@@ -150,8 +154,16 @@ app.post('/createuser', async(req, res) => {
       
 
         await userModel.findOneAndUpdate({ _id: user._id }, user, { new: true });
-
-    return res.render('g', {message: 'User Updated sucessfully.',user: req.session.user, userType: req.session.user.userType} );
+        if(req.body.appointment_id!=""){
+          res.redirect('/view-your-result')
+        }
+    let date=new Date()
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    date=`${year}-${month}-${day}`
+    const appointment = await appointmentModel.find({date, isAdded: true, isTimeAvailable:true});
+    return res.render('g', {message: 'User Updated sucessfully.',user: req.session.user, userType: req.session.user.userType,selectedDate: date, availableSlots:appointment} );
   } catch (error) {
     console.log(error);
     res.status(500).send('An error occurred while saving the user.');
@@ -160,14 +172,25 @@ app.post('/createuser', async(req, res) => {
 
   app.post('/updateCarInfo', async (req, res) => {
     const userId = req.body.userId;
-    const newData = {
+    console.log(req.body)
+    let newData = {
+      testType: req.body.testType || null,
       car_details: {
         make: req.body.make,
         model: req.body.model,
         year: req.body.year,
         platno: req.body.platenumber
-      },
-    };
+      }};
+    if(req.body.appointment_id!=""){
+      const appointment = await appointmentModel.updateOne({_id: new mongoose.Types.ObjectId(req.body.appointment_id)}, {
+        $set:{
+          isTimeAvailable: false
+        }
+      })
+      newData.appointment_id = req.body.appointment_id;
+    }
+  
+    console.log(newData)
   
     try {
       // Find the user by their user ID
@@ -179,7 +202,16 @@ app.post('/createuser', async(req, res) => {
         // Update the car information
         Object.assign(user, newData);
         await user.save();
-        return res.render('g', { message: 'Car information updated successfully.',user: req.session.user, userType: req.session.user.userType });
+        if(user.appointment_id){
+          res.redirect('/view-your-result')
+        }
+        let date=new Date()
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        date=`${year}-${month}-${day}`
+        const appointment = await appointmentModel.find({date, isAdded: true, isTimeAvailable:true});
+        return res.render('g', { message: 'Car information updated successfully.',user: req.session.user, userType: req.session.user.userType, selectedDate:date, availableSlots:appointment });
       }
     } catch (error) {
       console.error('Error updating car information:', error);
@@ -232,7 +264,7 @@ app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
     // Check if the username exists in the database
-    const user = await userModel.findOne({ username });
+    const user = await userModel.findOne({ username }).populate('appointment_id');
     console.log(user);
     if (!user) {
       return res.render('login', { message: 'User not found' });
@@ -448,5 +480,91 @@ app.post('/book_appointment',adminMiddleware.requireAdminAccess, async (req, res
   } catch (error) {
     console.log(error);
     return res.render ('login', { message: 'An error occurred while signing up' });
+  }
+});
+
+
+app.get('/list-appointments', examinerMiddleware.requireExaminerAccess, async(req, res)=>{
+  try{
+    let filter = {
+      status : "Pending",
+      appointment_id: { $ne: null },
+      userType: 'Driver'
+    };
+    console.log(req.query)
+    if(req.query.testType){
+      filter["testType"]=req.query.testType
+    }
+    console.log(filter)
+    const existingAppointment = await userModel.find(filter).populate('appointment_id');
+    console.log(existingAppointment)
+    return res.render('listAppointment',{user: req.session.user, userType: req.session.user.userType, appointments: existingAppointment, testType: req.query.testType }) 
+
+}catch (error) {
+  console.log(error);
+  let existingAppointment=[]
+  return res.render('listAppointment',{message:"Error while fetching records",user: req.session.user, userType: req.session.user.userType, appointments: existingAppointment, testType: req.params.testType }) 
+}
+});
+
+app.get('/viewResult', adminMiddleware.requireAdminAccess, async(req, res)=>{
+  try{
+    let filter = {
+      status : { $ne: 'Pending' },
+      appointment_id: { $ne: null },
+      userType: 'Driver'
+    };
+    console.log(req.query.status)
+    if(req.query.status){
+      filter["status"]=req.query.status
+    }
+    console.log(filter)
+    const existingAppointment = await userModel.find(filter).populate('appointment_id');
+    console.log(existingAppointment)
+    return res.render('candidateResult',{user: req.session.user, userType: req.session.user.userType, appointments: existingAppointment, testType: req.query.status }) 
+
+}catch (error) {
+  console.log(error);
+  let existingAppointment=[]
+  return res.render('listAppointment',{message:"Error while fetching records",user: req.session.user, userType: req.session.user.userType, appointments: existingAppointment, testType: req.params.testType }) 
+}
+});
+
+app.get('/:id', examinerMiddleware.requireExaminerAccess, async(req, res)=>{
+  try{
+    const existingAppointment = await userModel.findById(req.params.id).populate('appointment_id');
+    console.log(existingAppointment)
+    return res.render('updateAppointment',{user: req.session.user, userType: req.session.user.userType, currentUser: existingAppointment, testType: req.query.testType }) 
+
+}catch (error) {
+  console.log(error);
+  return res.render ('login', { message: 'An error occurred' });
+}
+});
+
+app.post('/:id', examinerMiddleware.requireExaminerAccess, async(req, res)=>{
+  try{
+    const existingAppointment = await userModel.findById(req.params.id).populate('appointment_id');
+    existingAppointment.comment= req.body.comment;
+    existingAppointment.status= req.body.status;
+    await existingAppointment.save();
+    console.log(existingAppointment)
+    return res.render('updateAppointment',{user: req.session.user, userType: req.session.user.userType, currentUser: existingAppointment, testType: req.query.testType }) 
+
+}catch (error) {
+  console.log(error);
+  return res.render ('login', { message: 'An error occurred' });
+}
+});
+
+
+app.get('/resetall', async(req, res)=>{
+  try{
+    
+    //await userModel.deleteMany({})
+    await appointmentModel.updateMany({$set:{isAdded: false, isTimeAvailable: false}})
+    return res.status(200).send('Records updated')
+}catch (error) {
+  console.log(error);
   }
 });

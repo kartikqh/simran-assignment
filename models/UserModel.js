@@ -16,20 +16,21 @@ const userSchema = new mongoose.Schema({
   },
   appointment_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Appointment'   
+    ref: 'Appointment',
+    default: null
     },
- examStatus:{
   testType:{
     type: String,
-    enum:["G2","G"]
+    enum:["G2","G", null]
   },
   comment:{
     type:String
   },
-  isPassed:{
-    type:Boolean
+  status:{
+    type: String,
+    enum:["Pending","Pass", "Fail"],
+    default:"Pending"
   }
- }
 });
 
 // Create User model

@@ -5,16 +5,18 @@
     <body>
         <!-- Navigation-->
         <% if (!locals.user) { %>
-            <%- include('layout/navigation'); -%>
-        <% } else { %>
-            <% if (locals.userType =="Admin") { %>
-                <%- include('layout/admin_navigation'); -%>
-            <% }  if (locals.userType =="Driver")  { %>
-                <%- include('layout/driver_navigation'); -%>
-            <% } if (locals.userType =="Examiner") { %>
-              <%- include('layout/examiner_navigation'); -%>
-              <% } %>
-        <% } %>
+          <%- include('layout/navigation'); -%>
+          <% } else { %>
+            <% if (user.appointment_id) { %>
+            <%- include('layout/driver_navigation_new'); -%>
+            <% } else if (locals.userType == "Admin") { %>
+          <%- include('layout/admin_navigation'); -%>
+          <% } else if (locals.userType == "Driver") { %>
+          <%- include('layout/driver_navigation'); -%>
+          <% } else if (locals.userType == "Examiner") { %>
+          <%- include('layout/examiner_navigation'); -%>
+          <% } %>
+          <% } %>
         
         <!-- give error message -->
         <% if (locals.message) { %>
@@ -34,7 +36,10 @@
                 <% if (locals.user) { %>
           
                 <div class="card-header" style="background-color: black; color: white;">
-                  <h3 class="text-center">Data Display</h3>
+                  <h3 class="text-center">Update Car Information 
+                    <br> ____________ <br>
+                    Book Slot for G Test
+                  </h3>
                 </div>
                 <div class="card-body">
                   <p>Name: <%= user.firstname %> <%= user.lastname %></p>
@@ -64,24 +69,29 @@
                       <div class="form-group">
                         <input disabled type="date" class="form-control" value="<%= selectedDate %>" name="date" />
                       </div>
-                      <% if (locals.availableSlots) { %>
+                      <% if (locals.availableSlots.length >0 ) { %>
+                        <div class="mb-3">
+                          <label>Select Slots</label>
+                          <select class="form-control" name="appointment_id">
+                            <option key="0" value="">Book Slot For G Test</option>
+                            <% availableSlots.forEach(function(slot) { %>
+                            <option key="<%= slot.id %>" value="<%= slot._id %>">
+                              <%= slot.time %>
+                            </option>
+                            <% }); %>
+                          </select>
+                        </div>
+                        <% } else { %>
+                        <div class="mb-3">
+                          <label>No Slots For today</label>
+                        </div>
+                        <% } %>
                       <div class="mb-3">
-                        <label>Select Slots</label>
-                        <select class="form-control" name="appointment_id">
-                          <% availableSlots.forEach(function(slot) { %>
-                          <option key="<%= slot.id %>" value="<%= slot._id %>">
-                            <%= slot.time %>
-                          </option>
-                          <% }); %>
-                        </select>
+                        <input hidden type="text" class="form-control" value="G" name="testType" />
                       </div>
-                      <% } else { %>
-                      <div class="mb-3">
-                        <label>No Slots For today</label>
-                      </div>
-                      <% } %>
                     </div>
-                    <button type="submit" style="background-color: blue; color: white; padding: 10px 20px; border: none; cursor: pointer;">Update Car Information</button>
+                    
+                    <button type="submit" style="background-color: blue; color: white; padding: 10px 20px; border: none; cursor: pointer;">Submit</button>
                   </form>
                   <% } %>
                 </div>

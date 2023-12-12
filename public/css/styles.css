@@ -4209,6 +4209,10 @@ textarea.form-control-lg {
 
 .card-title {
   margin-bottom: var(--bs-card-title-spacer-y);
+  color: black  !important;
+  text-align: center;
+  font-weight: bold;
+  margin-top: 20px;
 }
 
 .card-subtitle {

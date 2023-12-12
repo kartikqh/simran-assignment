@@ -42,11 +42,13 @@
     <% if (!locals.user) { %>
     <%- include('layout/navigation'); -%>
     <% } else { %>
-    <% if (locals.userType == "Admin") { %>
+    <% if (user.appointment_id) { %>
+    <%- include('layout/driver_navigation_new'); -%>
+    <% }else if (locals.userType == "Admin") { %>
     <%- include('layout/admin_navigation'); -%>
-    <% } if (locals.userType == "Driver") { %>
+    <% } else if (locals.userType == "Driver") { %>
     <%- include('layout/driver_navigation'); -%>
-    <% } if (locals.userType == "Examiner") { %>
+    <% } else if (locals.userType == "Examiner") { %>
     <%- include('layout/examiner_navigation'); -%>
     <% } %>
     <% } %>

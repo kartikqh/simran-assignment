@@ -6,14 +6,18 @@
 <body>
   <!-- Navigation -->
   <% if (!locals.user) { %>
-  <%- include('layout/navigation'); -%>
-  <% } else { %>
-  <% if (locals.userType == "Admin") { %>
-  <%- include('layout/admin_navigation'); -%>
-  <% } if (locals.userType == "Driver") { %>
-  <%- include('layout/driver_navigation'); -%>
-  <% } %>
-  <% } %>
+    <%- include('layout/navigation'); -%>
+    <% } else { %>
+      <% if (user.appointment_id) { %>
+        <%- include('layout/driver_navigation_new'); -%>
+        <% } else if (locals.userType == "Admin") { %>
+    <%- include('layout/admin_navigation'); -%>
+    <% } else if (locals.userType == "Driver") { %>
+    <%- include('layout/driver_navigation'); -%>
+    <% } else if (locals.userType == "Examiner") { %>
+    <%- include('layout/examiner_navigation'); -%>
+    <% } %>
+    <% } %>
 
   <!-- Error Message -->
   <% if (locals.message) { %>
@@ -24,7 +28,7 @@
     </div>
   </div>
   <% } %>
-
+  <% if (locals.licenseNo == "") { %>
   <div class="container">
     <h1>Data Entry Form</h1>
     <form action="/createuser" method="post">
@@ -90,7 +94,7 @@
             <div class="form-group">
               <label>Select Slots</label>
               <select class="form-control" name="appointment_id">
-                <option key="0" value="">Book Slot For G2</option>
+                <option key="0" value="">Book Slot</option>
                 <% availableSlots.forEach(function(slot) { %>
                 <option key="<%= slot.id %>" value="<%= slot._id %>">
                   <%= slot.time %>
@@ -123,6 +127,77 @@
       </div>
     </form>
   </div>
+  <%} else { %>
+    <div class="container">
+      <div class="row">
+          <div class="col-md-6 offset-md-3">
+            <div class="card">
+              <% if (locals.user) { %>
+        
+              <div class="card-header" style="background-color: black; color: white;">
+                <h3 class="text-center">Update Car Information 
+                  <br> ____________ <br>
+                  Book Slot for G2 Test</h3>
+              </div>
+              <div class="card-body">
+                <p>Name: <%= user.firstname %> <%= user.lastname %></p>
+                <p>Age: <%= user.age %></p>
+        
+                <form method="post" action="/updateCarInfo">
+                  <input type="hidden" name="userId" value="<%= user._id %>">
+                  <div class="mb-3">
+                    <label for="make">Make</label>
+                    <input type="text" class="form-control" name="make" id="make" value="<%= user.carInfo.make %>" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="model">Model</label>
+                    <input type="text" class="form-control" name="model" id="model" value="<%= user.carInfo.model %>" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="year">Year</label>
+                    <input type="text" class="form-control" name="year" id="year" value="<%= user.carInfo.year %>" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="plateNumber">Plate Number</label>
+                    <input type="text" class="form-control" name="platenumber" id="plateNumber"
+                      value="<%= user.carInfo.platno %>" required>
+                  </div>
+                  <div class="mb-3">
+                    <h3>Book Slots from 9 AM to 2 PM</h3>
+                    <div class="form-group">
+                      <input disabled type="date" class="form-control" value="<%= selectedDate %>" name="date" />
+                    </div>
+                    <% if (locals.availableSlots) { %>
+                    <div class="mb-3">
+                      <label>Select Slots</label>
+                      <select class="form-control" name="appointment_id">
+                        <option key="0" value="">Book Slot For G2 Test</option>
+                        <% availableSlots.forEach(function(slot) { %>
+                        <option key="<%= slot.id %>" value="<%= slot._id %>">
+                          <%= slot.time %>
+                        </option>
+                        <% }); %>
+                      </select>
+                    </div>
+                    <% } else { %>
+                    <div class="mb-3">
+                      <label>No Slots For today</label>
+                    </div>
+                    <% } %>
+                    <div class="mb-3">
+                      <input  hidden type="text" class="form-control" value="G2" name="testType" />
+                    </div>
+                  </div>
+                  <button type="submit" style="background-color: blue; color: white; padding: 10px 20px; border: none; cursor: pointer;">Submit</button>
+                </form>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+  </div>
+    <% } %>
 </body>
 
 </html>

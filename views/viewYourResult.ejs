@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('layout/header'); -%>
+<%- include('layout/script'); -%>
+  <style>
+    .filters{
+            text-align: center;
+            width:100%;
+            margin-bottom: 20px;
+            margin-top: -10px;
+        }
+  </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <% if (!locals.user) { %>
+    <%- include('layout/navigation'); -%>
+    <% } else { %>
+    <% if (user.appointment_id) { %>
+        <%- include('layout/driver_navigation_new'); -%>
+        <% } else if (locals.userType == "Admin") { %>
+    <%- include('layout/admin_navigation'); -%>
+    <% } else if (locals.userType == "Driver") { %>
+    <%- include('layout/driver_navigation'); -%>
+    <% } else if (locals.userType == "Examiner") { %>
+    <%- include('layout/examiner_navigation'); -%>
+    <% } %>
+    <% } %>
+
+    <!-- Error Message -->
+    <% if (locals.message) { %>
+    <div class="mt-5 mb-3">
+        <div class="custom-alert">
+            <strong><%= locals.message %></strong>
+            <button type="button" class="custom-close" aria-label="Close"></button>
+        </div>
+    </div>
+    <% } %>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+              <div class="card">
+                <% if (locals.user) { %>
+          
+                <div class="card-header" style="background-color: black; color: white;">
+                  <h3 class="text-center">Candidate Result
+                    <br> ____________ <br>
+                    </h3>
+                </div>
+                <div class="card-body">
+                  <p>Name: <%= user.firstname %> <%= user.lastname %></p>
+                  <p>Age: <%= user.age %></p>
+                  <p>License Number <%= user.licenseNo %></p>
+                  <p>Car Plate Number: <%= user.carInfo.platno %></p>
+                  <p>Appointment Date: <%= user.appointment_id.date %></p>
+                  <p>Appointment Time: <%= user.appointment_id.time %></p>
+                  <p>Test Type: <%= user.testType %></p>
+                  <p>Status: <%= user.status %></p>
+                  <% if (user.comment) { %>
+                    <div class="mb-3">
+                      <label for="addComment">Comment</label>
+                      <textarea class="form-control" name="comment" id="comment" rows="4"  disabled ><%= user.comment %></textarea>
+                    </div>
+                    <div class="mb-3">
+                      <label for="UpdateStatus">Result Status</label>
+                      <select id="UpdateStatus" name="status" class="form-control" disabled>
+                        <option value="Pending" style="color: yellow;" <% if (user.status === 'Pending') { %> selected <% } %>>Pending</option>
+                        <option value="Pass" style="color: green;" <% if (user.status === 'Pass') { %> selected <% } %>>Pass</option>
+                        <option value="Fail" style="color: Red;" <% if (user.status === 'Fail') { %> selected <% } %>> Fail</option>
+                    </select>
+                    </div>
+                    <% } %>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+    </div>
+</body>
+</html>

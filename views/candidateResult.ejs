@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Appointment View</title>
+    <%- include('layout/header'); -%>
+    <%- include('layout/script'); -%>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <style>
+        /* Add your custom styles here */
+        #appointmentsTable {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        .card-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        /* Custom styles for your table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            color: #000; /* Text color black */
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #e9ecef;
+        }
+
+    .filters{
+            text-align: center;
+            width:100%;
+            margin-bottom: 20px;
+            margin-top: -10px;
+        }
+
+        /* Increase size of filters */
+        .filters label,
+        .filters select {
+            font-size: 18px;
+        }
+
+        /* Button styles */
+        .update-btn {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .update-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+
+<body>
+    <!-- Navigation -->
+    <% if (!locals.user) { %>
+    <%- include('layout/navigation'); -%>
+    <% } else { %>
+    <% if (user.appointment_id) { %>
+    <%- include('layout/driver_navigation_new'); -%>
+    <% }else if (locals.userType == "Admin") { %>
+    <%- include('layout/admin_navigation'); -%>
+    <% } else if (locals.userType == "Driver") { %>
+    <%- include('layout/driver_navigation'); -%>
+    <% } else if (locals.userType == "Examiner") { %>
+    <%- include('layout/examiner_navigation'); -%>
+    <% } %>
+    <% } %>
+
+    <!-- Error Message -->
+    <% if (locals.message) { %>
+    <div class="mt-5 mb-3">
+        <div class="custom-alert">
+            <strong><%= locals.message %></strong>
+            <button type="button" class="custom-close" aria-label="Close"></button>
+        </div>
+    </div>
+    <% } %>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title">Candidate Results</h2>
+            <div class="filters">
+                <label for="testTypeFilter">Result:</label>
+                <select id="testTypeFilter" class="form-control" name="testType" onchange="filterAppointments()">
+                    <option value="">Select Pass / Fail</option>
+                    <option value="Pass" <% if (locals.testType === 'Pass') { %> selected <% } %>>Pass</option>
+                    <option value="Fail" <% if (locals.testType === 'Fail') { %> selected <% } %>>Fail</option>
+                </select>
+            </div>
+
+            <!-- Rest of your content -->
+
+            <div class="table-responsive" id="appointmentsTable">
+                <table class="table table-bordered" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>License Number</th>
+                            <th>Plate Number</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Test Type</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% appointments.forEach(function(appointment) { %>
+                        <tr>
+                            <td><%= appointment.firstname + ' ' + appointment.lastname %></td>
+                            <td><%= appointment.licenseNo %></td>
+                            <td><%= appointment.carInfo.platno %></td>
+                            <td><%= appointment.appointment_id.date %></td>
+                            <td><%= appointment.appointment_id.time %></td>
+                            <td><%= appointment.testType %></td>
+                            <td><%= appointment.status %></td>
+                            
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // DataTable initialization
+            $('#dataTable').DataTable({
+                paging: false, // No pagination
+                searching: false // No search bar
+            });
+        });
+
+        // Function to redirect based on filter selection
+        function filterAppointments() {
+            var selectedTestType = document.getElementById("testTypeFilter").value;
+            console.log(selectedTestType)
+            if (selectedTestType !="") {
+                window.location.href = '/viewResult?status=' + selectedTestType;
+            } else {
+                window.location.href = '/viewResult'; // Redirect to default URL
+            }
+        }
+    </script>
+</body>
+
+</html>
