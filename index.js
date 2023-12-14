@@ -74,9 +74,9 @@ app.get('/g',middleware.requireDriverAccess, async(req, res)=>{
     } else if ( user.licenseNo ==="") {
       console.log(user.licenseNo)
       if (appointment.length > 0){
-      return res.render ('g2', {message: 'Please Update your information first.',user: req.session.user, userType: req.session.user.userType, selectedDate: date, availableSlots:appointment, selectedSlot: appointment[0].time});
+      return res.render ('g2', {message: 'Please Update your information first.',user: req.session.user, userType: req.session.user.userType, selectedDate: date, availableSlots:appointment, selectedSlot: appointment[0].time, licenseNo:""});
       }
-      return res.render ('g2', {message: 'Please Update your information first.',user: req.session.user, userType: req.session.user.userType, selectedDate: date});
+      return res.render ('g2', {message: 'Please Update your information first.',user: req.session.user, userType: req.session.user.userType, selectedDate: date, licenseNo:"" });
     }
     else if(user.userType=="Driver"){
       // If user found, display user's information and allow editing car information
